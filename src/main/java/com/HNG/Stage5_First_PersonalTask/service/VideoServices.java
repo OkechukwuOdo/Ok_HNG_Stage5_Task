@@ -13,8 +13,8 @@ import java.util.List;
 @Service
 public interface VideoServices {
     public String startRecording();
-    public String uploadingVideo(MultipartFile video, String sessionId) throws IOException;
+    public String uploadingVideo(MultipartFile video) throws IOException;
 
-    public ResponseEntity<Resource> playVideo(String videoName) throws IOException;
+    public Resource playVideo(String videoName) throws IOException;
     public List<VideoResponseDto> listOfVideo();
 }

@@ -29,7 +29,9 @@ private final VideoRepo videoRepo;
     }
 
     @Override
-    public String uploadingVideo(MultipartFile videoChunk, String sessionId) throws IOException {
+    public String uploadingVideo(MultipartFile videoChunk) throws IOException {
+        String sessionId= UUID.randomUUID().toString();
+        int index=0;
         String videoSessionDirectory = videoDirectory + File.separator + sessionId;
         File videoSessionFile = new File(videoSessionDirectory);
 
@@ -86,24 +88,16 @@ private final VideoRepo videoRepo;
     }
 
     @Override
-    public ResponseEntity<Resource> playVideo(String videoName) throws IOException {
+    public Resource playVideo(String videoName) throws IOException {
         Videos videos= videoRepo.findByName(videoName);
 
         String filePath = videos.getVideoPath();
         Resource videoResource = new FileSystemResource(filePath);
 
         if (videoResource.exists() && videoResource.isReadable()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentLength(videoResource.contentLength());
-            headers.setContentDispositionFormData("attachment", videoName);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(videoResource);
-        } else {
-            return ResponseEntity.notFound().build();
+            return videoResource;
         }
+        throw new RuntimeException();
     }
 
     @Override
