@@ -21,9 +21,10 @@ public class VideoController {
     public String startRecording(){
         return null;
     }
-@PostMapping("/upload")
-    public ResponseEntity<String> uploadVideo(@RequestParam("video") MultipartFile video) throws IOException {
-        videoServices.uploadingVideo( video);
+      @PostMapping("/upload")
+    public ResponseEntity<String> uploadVideo(@RequestParam("video") MultipartFile video,
+                                                    @RequestParam String sessionId) throws IOException {
+        videoServices.uploadingVideo( video,sessionId);
         return null;
     }
     @GetMapping("/play/{videoTitle}")
@@ -38,7 +39,7 @@ public class VideoController {
         return new ResponseEntity<>(videoResources, headers, HttpStatus.OK);
     }
 
-    @GetMapping("all")
+    @GetMapping("/all")
     public ResponseEntity<List<VideoResponseDto>> allVideos(){
         List<VideoResponseDto> allVideo= videoServices.listOfVideo();
         return ResponseEntity.ok(allVideo);

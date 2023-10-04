@@ -22,16 +22,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VideoServiceImpl implements VideoServices{
 private final VideoRepo videoRepo;
-    private String videoDirectory="";
+    private String videoDirectory="/video";
     @Override
     public String startRecording() {
         return UUID.randomUUID().toString();
     }
 
     @Override
-    public String uploadingVideo(MultipartFile videoChunk) throws IOException {
-        String sessionId= UUID.randomUUID().toString();
-        int index=0;
+    public String uploadingVideo(MultipartFile videoChunk, String sessionId) throws IOException {
+
         String videoSessionDirectory = videoDirectory + File.separator + sessionId;
         File videoSessionFile = new File(videoSessionDirectory);
 
@@ -40,16 +39,16 @@ private final VideoRepo videoRepo;
         }
         if (!videoChunk.isEmpty()) {
 
-            if (videoChunk.getOriginalFilename().equals("END_OF_VIDEO")) {
-             String file= assembleVideoChunks(sessionId);
-             saveVideo(file,videoChunk.getName(),sessionId);
+            if (videoChunk.getOriginalFilename().equalsIgnoreCase("END_OF_VIDEO")) {
+             String filePath= assembleVideoChunks(sessionId);
+             saveVideo(filePath,videoChunk.getOriginalFilename(),sessionId);
             }
             String videoChunkFileName = videoSessionDirectory + File.separator + videoChunk.getOriginalFilename();
             File videoChunkFile= new File(videoChunkFileName);
             try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(videoChunkFile))) {
                 byte[] bytes = videoChunk.getBytes();
                 stream.write(bytes);
-                return null;
+                return " video uploading";
             } catch (IOException e) {
 
             }
@@ -66,10 +65,12 @@ private final VideoRepo videoRepo;
     }
 
     private String assembleVideoChunks(String sessionId) {
+        String finalVideoPath="";
         try {
             File[] chunkFiles = new File(videoDirectory).listFiles((dir, name) -> name.startsWith(sessionId + "-"));
             if (chunkFiles != null && chunkFiles.length > 0) {
                 File outputFile = new File(videoDirectory + File.separator + sessionId + ".mp4");
+                finalVideoPath=outputFile.getPath();
                 try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
                     for (File chunkFile : chunkFiles) {
                         byte[] chunkData = Files.readAllBytes(chunkFile.toPath());
@@ -84,7 +85,7 @@ private final VideoRepo videoRepo;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return finalVideoPath;
     }
 
     @Override
